@@ -1560,28 +1560,6 @@ document.querySelectorAll('.amount-btn').forEach(btn => {
   });
 });
 </script>
-<script>
-  if (!window.Telegram || !Telegram.WebApp) {
-    document.body.innerHTML = `
-      <div style="
-        display:flex;
-        justify-content:center;
-        align-items:center;
-        height:100vh;
-        background:#0f1225;
-        color:#fff;
-        font-family:Arial;
-        text-align:center;
-        padding:20px;
-      ">
-        <div>
-          <h1>Access denied</h1>
-          <p>This app is only available via Telegram bot.</p>
-        </div>
-      </div>
-    `;
-  }
-</script>
-
 </body>
+
 </html>
