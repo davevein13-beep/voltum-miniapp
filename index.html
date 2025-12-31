@@ -825,6 +825,7 @@ canvas#bg {
     font-size: 32px;
     padding: 20px;
     width: 95%;
+    max-width: 350px;
   }
   
   .dashboard-grid {
@@ -875,6 +876,7 @@ canvas#bg {
 @media (max-width: 480px) {
   .main-header {
     font-size: 28px;
+    max-width: 300px;
   }
   
   .card {
@@ -1018,15 +1020,15 @@ canvas#bg {
     <h2><i class="fas fa-cog"></i> Settings</h2>
     
     <div class="form-group">
-      <label>Language</label>
-      <select class="form-input">
-        <option>English</option>
-        <option>Russian</option>
+      <label id="languageLabel">Language</label>
+      <select class="form-input" id="languageSelect">
+        <option value="en">English</option>
+        <option value="ru">Русский</option>
       </select>
     </div>
     
-    <button class="action-button" style="margin-top: 30px; width: 100%;">
-      <i class="fas fa-save"></i> Save Settings
+    <button class="action-button" style="margin-top: 30px; width: 100%;" id="saveSettingsBtn">
+      <i class="fas fa-save"></i> <span id="saveSettingsText">Save Settings</span>
     </button>
   </div>
 </div>
@@ -1034,10 +1036,10 @@ canvas#bg {
 <!-- Deposit Modal -->
 <div id="depositModal" class="modal-overlay">
   <div class="modal">
-    <h3><i class="fas fa-plus-circle"></i> Deposit Funds</h3>
+    <h3><i class="fas fa-plus-circle"></i> <span id="depositTitle">Deposit Funds</span></h3>
     
     <div class="form-group">
-      <label>Amount (USDT)</label>
+      <label id="amountLabel">Amount (USDT)</label>
       <div class="input-with-icon">
         <i class="fas fa-dollar-sign"></i>
         <input type="number" class="form-input" id="depositAmount" placeholder="Enter amount" min="10">
@@ -1051,19 +1053,27 @@ canvas#bg {
     </div>
     
     <div class="form-group">
-      <label>Wallet Address</label>
+      <label id="coinNetworkLabel">Coin & Network</label>
+      <select class="form-input" id="depositCoinSelect" onchange="updateDepositAddress()">
+        <option value="USDT">USDT (TRC20)</option>
+        <option value="TON">TON Coin</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label id="walletAddressLabel">Wallet Address</label>
       <div class="input-with-icon">
         <i class="fas fa-wallet"></i>
-        <input type="text" class="form-input" readonly value="0x742d35Cc6634C0532925a3b8" style="background: rgba(255,255,255,0.05);">
+        <input type="text" class="form-input" id="depositAddressInput" readonly style="background: rgba(255,255,255,0.05);">
       </div>
-      <button onclick="copyWalletAddress()" style="margin-top: 10px; padding: 10px; background: var(--secondary-gold); color: white; border: none; border-radius: 8px; cursor: pointer; width: 100%;">
-        <i class="fas fa-copy"></i> Copy Wallet Address
+      <button onclick="copyDepositAddress()" style="margin-top: 10px; padding: 10px; background: var(--secondary-gold); color: white; border: none; border-radius: 8px; cursor: pointer; width: 100%;">
+        <i class="fas fa-copy"></i> <span id="copyAddressText">Copy Wallet Address</span>
       </button>
     </div>
     
     <div class="modal-buttons">
-      <button class="btn btn-secondary" onclick="closeModal('depositModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="processDeposit()">Confirm Deposit</button>
+      <button class="btn btn-secondary" onclick="closeModal('depositModal')" id="cancelDepositBtn">Cancel</button>
+      <button class="btn btn-primary" onclick="processDeposit()" id="confirmDepositBtn">Confirm Deposit</button>
     </div>
   </div>
 </div>
@@ -1071,21 +1081,21 @@ canvas#bg {
 <!-- Withdraw Modal -->
 <div id="withdrawModal" class="modal-overlay">
   <div class="modal">
-    <h3><i class="fas fa-minus-circle"></i> Withdraw Funds</h3>
+    <h3><i class="fas fa-minus-circle"></i> <span id="withdrawTitle">Withdraw Funds</span></h3>
     
     <div class="form-group">
-      <label>Amount</label>
+      <label id="withdrawAmountLabel">Amount</label>
       <div class="input-with-icon">
         <i class="fas fa-dollar-sign"></i>
         <input type="number" class="form-input" id="withdrawAmount" placeholder="Enter amount" max="1542.36">
       </div>
       <div style="text-align: right; margin-top: 5px; color: #a8b2d1;">
-        Available: <span style="color: var(--accent-gold);">$1,542.36</span>
+        <span id="availableText">Available:</span> <span style="color: var(--accent-gold);">$1,542.36</span>
       </div>
     </div>
     
     <div class="form-group">
-      <label>Withdrawal Address</label>
+      <label id="withdrawalAddressLabel">Withdrawal Address</label>
       <div class="input-with-icon">
         <i class="fas fa-wallet"></i>
         <input type="text" class="form-input" placeholder="Enter wallet address">
@@ -1093,24 +1103,24 @@ canvas#bg {
     </div>
     
     <div class="form-group">
-      <label>Coin & Network</label>
+      <label id="withdrawCoinNetworkLabel">Coin & Network</label>
       <select class="form-input">
         <option>USDT (TRC20)</option>
-        <option>ToneCoin</option>
+        <option>TON Coin</option>
       </select>
     </div>
     
     <div class="form-group">
       <div style="background: rgba(255, 215, 0, 0.1); padding: 15px; border-radius: 10px; border-left: 4px solid var(--accent-gold);">
         <p style="margin: 0; color: var(--light-text); font-size: 14px;">
-          <i class="fas fa-info-circle"></i> Withdrawal fee: $1.00 (Network fee may apply)
+          <i class="fas fa-info-circle"></i> <span id="withdrawFeeText">Withdrawal fee: $1.00 (Network fee may apply)</span>
         </p>
       </div>
     </div>
     
     <div class="modal-buttons">
-      <button class="btn btn-secondary" onclick="closeModal('withdrawModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="processWithdrawal()">Confirm Withdrawal</button>
+      <button class="btn btn-secondary" onclick="closeModal('withdrawModal')" id="cancelWithdrawBtn">Cancel</button>
+      <button class="btn btn-primary" onclick="processWithdrawal()" id="confirmWithdrawBtn">Confirm Withdrawal</button>
     </div>
   </div>
 </div>
@@ -1119,19 +1129,193 @@ canvas#bg {
 <nav class="main-nav">
   <a href="#" class="nav-item active" onclick="switchPage('dashboard')">
     <i class="fas fa-home"></i>
-    <span>Dashboard</span>
+    <span id="navDashboard">Dashboard</span>
   </a>
   <a href="#" class="nav-item" onclick="switchPage('history')">
     <i class="fas fa-history"></i>
-    <span>History</span>
+    <span id="navHistory">History</span>
   </a>
   <a href="#" class="nav-item" onclick="switchPage('settings')">
     <i class="fas fa-cog"></i>
-    <span>Settings</span>
+    <span id="navSettings">Settings</span>
   </a>
 </nav>
 
 <script>
+// Language management
+const translations = {
+  en: {
+    // Navigation
+    navDashboard: "Dashboard",
+    navHistory: "History",
+    navSettings: "Settings",
+    
+    // Dashboard
+    totalBalance: "Total Balance",
+    usdtBalance: "USDT Balance",
+    vlmBalance: "VLM Balance",
+    profit24h: "24h Profit",
+    dailyTarget: "Daily Target",
+    deposit: "Deposit",
+    withdraw: "Withdraw",
+    
+    // History
+    transactionHistory: "Transaction History",
+    
+    // Settings
+    settings: "Settings",
+    language: "Language",
+    english: "English",
+    russian: "Русский",
+    saveSettings: "Save Settings",
+    
+    // Deposit Modal
+    depositTitle: "Deposit Funds",
+    amountLabel: "Amount (USDT)",
+    coinNetworkLabel: "Coin & Network",
+    walletAddressLabel: "Wallet Address",
+    copyAddressText: "Copy Wallet Address",
+    cancel: "Cancel",
+    confirmDeposit: "Confirm Deposit",
+    
+    // Withdraw Modal
+    withdrawTitle: "Withdraw Funds",
+    withdrawAmountLabel: "Amount",
+    availableText: "Available:",
+    withdrawalAddressLabel: "Withdrawal Address",
+    withdrawCoinNetworkLabel: "Coin & Network",
+    withdrawFeeText: "Withdrawal fee: $1.00 (Network fee may apply)",
+    confirmWithdrawal: "Confirm Withdrawal"
+  },
+  ru: {
+    // Navigation
+    navDashboard: "Главная",
+    navHistory: "История",
+    navSettings: "Настройки",
+    
+    // Dashboard
+    totalBalance: "Общий баланс",
+    usdtBalance: "Баланс USDT",
+    vlmBalance: "Баланс VLM",
+    profit24h: "Прибыль за 24ч",
+    dailyTarget: "Дневная цель",
+    deposit: "Пополнить",
+    withdraw: "Вывести",
+    
+    // History
+    transactionHistory: "История операций",
+    
+    // Settings
+    settings: "Настройки",
+    language: "Язык",
+    english: "English",
+    russian: "Русский",
+    saveSettings: "Сохранить настройки",
+    
+    // Deposit Modal
+    depositTitle: "Пополнение средств",
+    amountLabel: "Сумма (USDT)",
+    coinNetworkLabel: "Монета и сеть",
+    walletAddressLabel: "Адрес кошелька",
+    copyAddressText: "Копировать адрес",
+    cancel: "Отмена",
+    confirmDeposit: "Подтвердить пополнение",
+    
+    // Withdraw Modal
+    withdrawTitle: "Вывод средств",
+    withdrawAmountLabel: "Сумма",
+    availableText: "Доступно:",
+    withdrawalAddressLabel: "Адрес вывода",
+    withdrawCoinNetworkLabel: "Монета и сеть",
+    withdrawFeeText: "Комиссия вывода: $1.00 (Может взиматься комиссия сети)",
+    confirmWithdrawal: "Подтвердить вывод"
+  }
+};
+
+// Wallet addresses
+const walletAddresses = {
+  USDT: "THUM2oETUuDmv1MCX51qarZQaJtnF64mjC",
+  TON: "UQBFgXjYufLu1Dc44ZOJdukLi9owxTRo1-Gmow4TgPAraxhd"
+};
+
+let currentLanguage = localStorage.getItem('voltum_language') || 'en';
+
+// Initialize language
+function initLanguage() {
+  const languageSelect = document.getElementById('languageSelect');
+  if (languageSelect) {
+    languageSelect.value = currentLanguage;
+    updateLanguage();
+  }
+}
+
+function updateLanguage() {
+  const lang = translations[currentLanguage];
+  
+  // Update navigation
+  document.getElementById('navDashboard').textContent = lang.navDashboard;
+  document.getElementById('navHistory').textContent = lang.navHistory;
+  document.getElementById('navSettings').textContent = lang.navSettings;
+  
+  // Update dashboard
+  const totalBalanceTitle = document.querySelector('#dashboard .card h2');
+  if (totalBalanceTitle) {
+    totalBalanceTitle.innerHTML = `<i class="fas fa-wallet"></i> ${lang.totalBalance}`;
+  }
+  
+  const stats = document.querySelectorAll('#dashboard .stat-label');
+  if (stats.length >= 3) {
+    stats[0].textContent = lang.usdtBalance;
+    stats[1].textContent = lang.vlmBalance;
+    stats[2].textContent = lang.profit24h;
+  }
+  
+  const progressLabel = document.querySelector('#dashboard .progress-label span:first-child');
+  if (progressLabel) {
+    progressLabel.textContent = lang.dailyTarget;
+  }
+  
+  const buttons = document.querySelectorAll('.action-button');
+  if (buttons.length >= 2) {
+    buttons[0].innerHTML = `<i class="fas fa-plus-circle"></i> ${lang.deposit}`;
+    buttons[1].innerHTML = `<i class="fas fa-minus-circle"></i> ${lang.withdraw}`;
+  }
+  
+  // Update history
+  const historyTitle = document.querySelector('#history .card h2');
+  if (historyTitle) {
+    historyTitle.innerHTML = `<i class="fas fa-history"></i> ${lang.transactionHistory}`;
+  }
+  
+  // Update settings
+  const settingsTitle = document.querySelector('#settings .card h2');
+  if (settingsTitle) {
+    settingsTitle.innerHTML = `<i class="fas fa-cog"></i> ${lang.settings}`;
+  }
+  
+  document.getElementById('languageLabel').textContent = lang.language;
+  document.getElementById('saveSettingsText').textContent = lang.saveSettings;
+  
+  // Update deposit modal
+  document.getElementById('depositTitle').textContent = lang.depositTitle;
+  document.getElementById('amountLabel').textContent = lang.amountLabel;
+  document.getElementById('coinNetworkLabel').textContent = lang.coinNetworkLabel;
+  document.getElementById('walletAddressLabel').textContent = lang.walletAddressLabel;
+  document.getElementById('copyAddressText').textContent = lang.copyAddressText;
+  document.getElementById('cancelDepositBtn').textContent = lang.cancel;
+  document.getElementById('confirmDepositBtn').textContent = lang.confirmDeposit;
+  
+  // Update withdraw modal
+  document.getElementById('withdrawTitle').textContent = lang.withdrawTitle;
+  document.getElementById('withdrawAmountLabel').textContent = lang.withdrawAmountLabel;
+  document.getElementById('availableText').textContent = lang.availableText;
+  document.getElementById('withdrawalAddressLabel').textContent = lang.withdrawalAddressLabel;
+  document.getElementById('withdrawCoinNetworkLabel').textContent = lang.withdrawCoinNetworkLabel;
+  document.getElementById('withdrawFeeText').textContent = lang.withdrawFeeText;
+  document.getElementById('cancelWithdrawBtn').textContent = lang.cancel;
+  document.getElementById('confirmWithdrawBtn').textContent = lang.confirmWithdrawal;
+}
+
 // Canvas Background
 const canvas = document.getElementById('bg');
 const ctx = canvas.getContext('2d');
@@ -1278,8 +1462,20 @@ function switchPage(pageId) {
   }
 }
 
+// Update deposit address based on coin selection
+function updateDepositAddress() {
+  const coinSelect = document.getElementById('depositCoinSelect');
+  const addressInput = document.getElementById('depositAddressInput');
+  
+  if (coinSelect && addressInput) {
+    const selectedCoin = coinSelect.value;
+    addressInput.value = walletAddresses[selectedCoin] || '';
+  }
+}
+
 // Modal Functions
 function openDepositModal() {
+  updateDepositAddress();
   document.getElementById('depositModal').classList.add('active');
 }
 
@@ -1302,22 +1498,28 @@ function setDepositAmount(amount) {
   });
 }
 
-function copyWalletAddress() {
-  const walletAddress = "0x742d35Cc6634C0532925a3b8";
-  navigator.clipboard.writeText(walletAddress).then(() => {
-    alert('Wallet address copied to clipboard!');
-  });
+function copyDepositAddress() {
+  const addressInput = document.getElementById('depositAddressInput');
+  if (addressInput && addressInput.value) {
+    navigator.clipboard.writeText(addressInput.value).then(() => {
+      alert(currentLanguage === 'ru' ? 'Адрес скопирован в буфер обмена!' : 'Wallet address copied to clipboard!');
+    });
+  }
 }
 
 function processDeposit() {
   const amount = document.getElementById('depositAmount').value;
   if(!amount || amount < 10) {
-    alert('Please enter a valid amount (minimum $10)');
+    alert(currentLanguage === 'ru' ? 'Пожалуйста, введите корректную сумму (минимум $10)' : 'Please enter a valid amount (minimum $10)');
     return;
   }
   
   // Show success message
-  alert(`Deposit request for $${amount} submitted successfully!`);
+  const message = currentLanguage === 'ru' 
+    ? `Запрос на пополнение на сумму $${amount} успешно отправлен!`
+    : `Deposit request for $${amount} submitted successfully!`;
+  
+  alert(message);
   closeModal('depositModal');
   
   // In a real app, you would send this to your backend
@@ -1327,17 +1529,21 @@ function processDeposit() {
 function processWithdrawal() {
   const amount = document.getElementById('withdrawAmount').value;
   if(!amount || amount <= 0) {
-    alert('Please enter a valid amount');
+    alert(currentLanguage === 'ru' ? 'Пожалуйста, введите корректную сумму' : 'Please enter a valid amount');
     return;
   }
   
   if(amount > 1542.36) {
-    alert('Insufficient balance');
+    alert(currentLanguage === 'ru' ? 'Недостаточно средств' : 'Insufficient balance');
     return;
   }
   
   // Show success message
-  alert(`Withdrawal request for $${amount} submitted successfully!\nProcessing time: 1-24 hours`);
+  const message = currentLanguage === 'ru'
+    ? `Запрос на вывод на сумму $${amount} успешно отправлен!\nВремя обработки: 1-24 часа`
+    : `Withdrawal request for $${amount} submitted successfully!\nProcessing time: 1-24 hours`;
+  
+  alert(message);
   closeModal('withdrawModal');
   
   // In a real app, you would send this to your backend
@@ -1371,6 +1577,30 @@ document.querySelectorAll('.amount-btn').forEach(btn => {
     this.classList.add('active');
   });
 });
+
+// Language change handler
+document.getElementById('languageSelect')?.addEventListener('change', function() {
+  currentLanguage = this.value;
+  localStorage.setItem('voltum_language', currentLanguage);
+  updateLanguage();
+});
+
+// Save settings button
+document.getElementById('saveSettingsBtn')?.addEventListener('click', function() {
+  const message = currentLanguage === 'ru' 
+    ? 'Настройки успешно сохранены!'
+    : 'Settings saved successfully!';
+  alert(message);
+});
+
+// Initialize everything when page loads
+window.addEventListener('DOMContentLoaded', function() {
+  initLanguage();
+  updateDepositAddress(); // Set initial deposit address
+});
+
+// Initialize
+updateDepositAddress();
 </script>
 </body>
 </html>
